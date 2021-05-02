@@ -1,0 +1,6 @@
+1 - set rabbitmq parmas in src/main/application.properties
+2 - build the jar : 
+    ./mvnw clean package
+
+3 - test the jar :
+    java -jar target/messaging-rabbitmq-0.0.1-SNAPSHOT.jar
