@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: my-rabbit-hostname
+    container_name: 'rabbitmq-ctn'
+    volumes:
+      - ./rabbitmq/etc/definitions.json:/home/elmos/work/rmq/etc/rabbitmq/definitions.json
+      - ./rabbitmq/etc/rabbitmq.conf:/home/elmos/work/rmq/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/data:/home/elmos/work/rmq/var/lib/rabbitmq/mnesia/rabbit@my-rabbit
+      - ./rabbitmq/logs:/home/elmos/work/rmq/var/log/rabbitmq/log
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - rabbitmq_go_net
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge

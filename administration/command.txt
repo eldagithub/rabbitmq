@@ -1,0 +1,4 @@
+VHOST :
+rabbitmqctl add_vhost qa1
+curl -k -u admin:pass2000 -X PUT https://centosboxpro:15673/api/vhosts/vh1
+curl -k -u admin:pass2000 -X DELETE https://centosboxpro:15673/api/vhosts/vh1
