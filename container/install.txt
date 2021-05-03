@@ -1,7 +1,19 @@
 
 docker pull rabbitmq:3-management
 
-docker run -d -v /home/elmos/work/rmq/Rabbitmq:/var/lib/rabbitmq --hostname my-rabbit --name rabbit-dev -p 15672:15672 -p 5671:5671 -p 5672:5672 rabbitmq:3-management
+docker run -d  --hostname my-rabbit --name rabbit-poc \
+ -p 15672:15672 -p 5671:5671 -p 5672:5672 \
+ -v /home/elmos/work/rmq/data:/var/lib/rabbitmq \
+ -v /home/elmos/work/rmq/logs:/var/log/rabbitmq/log \
+ -v /home/elmos/work/rmq/etc:/etc/rabbitmq/ \
+  rabbitmq:3-management
+
+
+
+     - ./rabbitmq/etc/definitions.json:/home/elmos/work/rmq/etc/rabbitmq/definitions.json
+      - ./rabbitmq/etc/rabbitmq.conf:/home/elmos/work/rmq/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/data:/home/elmos/work/rmq/var/lib/rabbitmq/mnesia/rabbit@my-rabbit
+      - ./rabbitmq/logs:/home/elmos/work/rmq/var/log/rabbitmq/log
 
 
 docker run --rm -it --hostname my-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3-management
