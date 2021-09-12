@@ -10,31 +10,46 @@ docker network create mynet
 
 docker network inspect mynet
 
+docker stop myrabbit1  myrabbit2 myrabbit3
+docker rm myrabbit1  myrabbit2 myrabbit3
 
-docker run -d --hostname rabbit1 --name myrabbit1 -p 15672:15672 -p 5672:5672 --network mynet -e RABBITMQ_ERLANG_COOKIE=rabbitcookie rabbitmq:management
-docker run -d --hostname rabbit2 --name myrabbit2 -p 5673:5672 --link myrabbit1:rabbit1 --network mynet -e RABBITMQ_ERLANG_COOKIE=rabbitcookie rabbitmq:management
-docker run -d --hostname rabbit3 --name myrabbit3 -p 5674:5672 --link myrabbit1:rabbit1 --link myrabbit2:rabbit2 --network mynet -e RABBITMQ_ERLANG_COOKIE=rabbitcookie rabbitmq:management
+docker run -d --hostname rabbit1 --name myrabbit1 \
+        -p 15672:15672 -p 5672:5672 --network mynet \
+        -e RABBITMQ_ERLANG_COOKIE=rabbitcookie2021\
+        rabbitmq:management
 
-docker exec -it myrabbit1 bash
-rabbitmqctl stop_app
-rabbitmqctl reset
-rabbitmqctl start_app
+docker run -d --hostname rabbit2 --name myrabbit2 \
+        -p 5673:5672 --link myrabbit1:rabbit1 --network mynet \
+        -e RABBITMQ_ERLANG_COOKIE=rabbitcookie2021\
+        rabbitmq:management
 
+docker run -d --hostname rabbit3 --name myrabbit3 \
+        -p 5674:5672 --link myrabbit1:rabbit1 --link myrabbit2:rabbit2 --network mynet \
+        -e RABBITMQ_ERLANG_COOKIE=rabbitcookie2021\
+        rabbitmq:management
 
+docker exec myrabbit1 date;docker logs myrabbit1 | grep "Server startup complete"
+docker exec myrabbit2 date;docker logs myrabbit2 | grep "Server startup complete"
+docker exec myrabbit3 date;docker logs myrabbit3 | grep "Server startup complete"
 
-docker exec -it myrabbit2 bash
-rabbitmqctl stop_app
-rabbitmqctl reset
-rabbitmqctl join_cluster --ram rabbit@rabbit1
-rabbitmqctl start_app
+docker exec myrabbit1 rabbitmqctl stop_app;sleep 5
+docker exec myrabbit1 rabbitmqctl reset;sleep 5
+docker exec myrabbit1 rabbitmqctl start_app;sleep 5
+docker exec myrabbit1 date;docker logs myrabbit1 | grep "Server startup complete"
 
+docker exec myrabbit2 rabbitmqctl stop_app;sleep 5
+docker exec myrabbit2 rabbitmqctl reset;sleep 5
+docker exec myrabbit2 rabbitmqctl join_cluster --ram rabbit@rabbit1;sleep 8
+docker exec myrabbit2 rabbitmqctl start_app
+docker exec myrabbit2 date;docker logs myrabbit2 | grep "Server startup complete"
 
+docker exec myrabbit3 rabbitmqctl stop_app;sleep 5
+docker exec myrabbit3 rabbitmqctl reset;sleep 5
+docker exec myrabbit3 rabbitmqctl join_cluster --ram rabbit@rabbit1;sleep 8
+docker exec myrabbit3 rabbitmqctl start_app
+docker exec myrabbit3 date;docker logs myrabbit3 | grep "Server startup complete"
 
-docker exec -it myrabbit3 bash
-rabbitmqctl stop_app
-rabbitmqctl reset
-rabbitmqctl join_cluster --ram rabbit@rabbit1
-rabbitmqctl start_app
+docker exec myrabbit1 rabbitmqctl set_policy ha "." '{"ha-mode":"all"}'
 
 
 -----------
@@ -72,7 +87,7 @@ docker run -d -h rabbitHost1 --network mynetrmq \
            -e RABBITMQ_DEFAULT_USER=admin -e RABBITMQ_DEFAULT_PASS=Admin123\
            rabbitmq:management
   
-docker logs rabbitNode1
+docker exec rabbitNode1 date; docker logs rabbitNode1 | grep "Server startup complete"
 
 
 docker run -d -h rabbitHost2 --network mynetrmq  --link rabbitNode1:rabbitHost1 \
@@ -88,19 +103,19 @@ docker run -d -h rabbitHost2 --network mynetrmq  --link rabbitNode1:rabbitHost1 
            -e RABBITMQ_DEFAULT_USER=admin -e RABBITMQ_DEFAULT_PASS=Admin123\
            rabbitmq:management
 
-docker logs rabbitNode2
+docker exec rabbitNode2 date; docker logs rabbitNode2 | grep "Server startup complete"
 
 ## fin option cookie
 
-docker exec rabbitNode1 rabbitmqctl stop_app
-docker exec rabbitNode1 rabbitmqctl reset
-docker exec rabbitNode1 rabbitmqctl start_app
+docker exec rabbitNode1 rabbitmqctl stop_app;sleep 5
+docker exec rabbitNode1 rabbitmqctl reset;sleep 5
+docker exec rabbitNode1 rabbitmqctl start_app;sleep 5
 docker exec rabbitNode1 date;docker logs rabbitNode1 | grep "Server startup complete"
 
-docker exec rabbitNode2 rabbitmqctl stop_app
-docker exec rabbitNode2 rabbitmqctl reset
+docker exec rabbitNode2 rabbitmqctl stop_app;sleep 5
+docker exec rabbitNode2 rabbitmqctl reset;sleep 5
 
-docker exec rabbitNode2 rabbitmqctl join_cluster rabbit@rabbitHost1
+docker exec rabbitNode2 rabbitmqctl join_cluster rabbit@rabbitHost1;sleep 5
 
 docker exec rabbitNode2 rabbitmqctl start_app
 docker exec rabbitNode2 date;docker logs rabbitNode2 | grep "Server startup complete"
